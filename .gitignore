@@ -1,0 +1,24 @@
+# 1. Bỏ qua thư mục chứa dữ liệu cứng của cơ sở dữ liệu MySQL
+mysql_data/
+db_data/
+
+# 2. Bỏ qua các file môi trường (chứa mật khẩu root MySQL, cấu hình bảo mật)
+.env
+*.env
+.env.*
+!.env.example
+
+# 3. Bỏ qua thư mục chứa log sinh ra từ web server hoặc hệ thống
+logs/
+*.log
+npm-debug.log*
+
+# 4. Bỏ qua thư mục chứa thư viện mã nguồn (nếu dùng Node.js hoặc PHP/Laravel)
+node_modules/
+vendor/
+
+# 5. Bỏ qua các file cấu hình cục bộ của công cụ lập trình (VSCode, Visual Studio, Eclipse)
+.vscode/
+.idea/
+.vs/
+*.suo
