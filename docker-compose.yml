@@ -59,8 +59,87 @@ services:
     networks:
       - frontend_net
 
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: ecommerce_nginx_exporter
+    restart: always
+    command:
+      - -nginx.scrape-uri=http://nginx:80/stub_status
+    ports:
+      - "9113:9113"
+    depends_on:
+      - nginx
+    networks:
+      - frontend_net
+
+  mysqld-exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: ecommerce_mysql_exporter
+    restart: always
+    volumes:
+      - ./mysql_config/exporter.cnf:/etc/my.cnf:ro
+    command:
+      - --config.my-cnf=/etc/my.cnf
+      - --mysqld.address=db:3306
+      - --web.listen-address=:9104
+    ports:
+      - "9104:9104"
+    depends_on:
+      - db
+    networks:
+      - backend_net
+      - frontend_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ecommerce_prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - frontend_net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ecommerce_grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=Grafana_Adm1n_Sec2026!
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana-dashboards
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - frontend_net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: ecommerce_cadvisor
+    restart: always
+    ports:
+      - "8082:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - frontend_net
+
 networks:
   frontend_net:
     driver: bridge
   backend_net:
     driver: bridge
+
+volumes:
+  grafana_data:
